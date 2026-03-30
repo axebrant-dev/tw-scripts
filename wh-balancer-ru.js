@@ -26,7 +26,7 @@
     report: 'Отчёт',
     result: 'Результат',
     noPlan: 'Подходящих отправок не найдено.',
-    loaded: 'Данные загружены.',
+    loaded: 'Данные загружены.'
   };
 
   const DEFAULTS = {
@@ -34,32 +34,26 @@
     autoSend: false,
     previewBeforeAutoSend: true,
     prioritizeSmallVillages: true,
-
     minSourcePointsPriority: 6000,
     maxTargetPointsPriority: 3000,
-
     maxTravelMinutes: 180,
     minBatchPerResource: 1000,
     minMerchantsInSource: 1,
     maxOrdersPerRun: 60,
     maxMerchantsPerRun: 500,
     sendDelayMs: 350,
-
     targetWarehouseFillPriority: 0.90,
     targetWarehouseFillNormal: 0.65,
-
     builtOutWarehouseKeep: 0.25,
     builtOutHighFarm: 23000,
     builtOutHighPoints: 9000,
-
     sourceReserveWood: 30000,
     sourceReserveStone: 30000,
     sourceReserveIron: 30000,
     sourceReservePercent: 0.20,
-
     useWhiteListOnly: false,
     whiteList: '',
-    blackList: '',
+    blackList: ''
   };
 
   const state = {
@@ -68,7 +62,7 @@
     incoming: {},
     plan: [],
     sentOrders: [],
-    summary: null,
+    summary: null
   };
 
   start();
@@ -82,7 +76,7 @@
       const urls = getUrls();
       const [incomingHtml, prodHtml] = await Promise.all([
         fetchPage(urls.incomingUrl),
-        fetchPage(urls.productionUrl),
+        fetchPage(urls.productionUrl)
       ]);
 
       state.incoming = state.settings.includeIncoming ? parseIncomingPage(incomingHtml) : {};
@@ -109,6 +103,16 @@
       renderShell(`Ошибка: ${escapeHtml(error.message || String(error))}`);
       UI.ErrorMessage(`Балансировщик: ${error.message || error}`);
     }
+  }
+
+  function fetchPage(url) {
+    return new Promise((resolve, reject) => {
+      $.get(url)
+        .done(resolve)
+        .fail((xhr, status, err) => {
+          reject(new Error(`Не удалось загрузить ${url}: ${err || status}`));
+        });
+    });
   }
 
   function getUrls() {
@@ -452,7 +456,7 @@
         farmTotal,
         incomingWood: incoming.wood || 0,
         incomingStone: incoming.stone || 0,
-        incomingIron: incoming.iron || 0,
+        incomingIron: incoming.iron || 0
       });
     });
 
@@ -522,7 +526,7 @@
         .map(src => ({
           ...src,
           distance: distance(src.x, src.y, target.x, target.y),
-          travelMinutes: merchantTravelMinutes(src.x, src.y, target.x, target.y),
+          travelMinutes: merchantTravelMinutes(src.x, src.y, target.x, target.y)
         }))
         .filter(src => src.travelMinutes <= settings.maxTravelMinutes)
         .sort((a, b) => {
@@ -555,7 +559,7 @@
           iron: moved.iron,
           merchants,
           distance: distance(live.x, live.y, target.x, target.y),
-          travelMinutes: merchantTravelMinutes(live.x, live.y, target.x, target.y),
+          travelMinutes: merchantTravelMinutes(live.x, live.y, target.x, target.y)
         });
 
         usedMerchants += merchants;
@@ -592,7 +596,7 @@
       extraStone,
       extraIron,
       supplyTotal: extraWood + extraStone + extraIron,
-      priorityScore: village.points >= settings.minSourcePointsPriority ? 2 : 1,
+      priorityScore: village.points >= settings.minSourcePointsPriority ? 2 : 1
     };
   }
 
@@ -615,7 +619,7 @@
       needStone,
       needIron,
       needTotal: needWood + needStone + needIron,
-      priorityScore: isPriority ? 3 : village.points <= settings.maxTargetPointsPriority ? 2 : 1,
+      priorityScore: isPriority ? 3 : village.points <= settings.maxTargetPointsPriority ? 2 : 1
     };
   }
 
@@ -634,7 +638,7 @@
       const reduced = {
         wood: roundDownTo1000(Math.floor(wood * ratio)),
         stone: roundDownTo1000(Math.floor(stone * ratio)),
-        iron: roundDownTo1000(Math.floor(iron * ratio)),
+        iron: roundDownTo1000(Math.floor(iron * ratio))
       };
       if (reduced.wood + reduced.stone + reduced.iron <= 0) return null;
       applyTransfer(source, target, reduced);
@@ -702,7 +706,7 @@
       target_id: order.targetId,
       wood: order.wood,
       stone: order.stone,
-      iron: order.iron,
+      iron: order.iron
     };
 
     return new Promise(resolve => {
@@ -771,7 +775,7 @@
       woodTotal: v.wood + (state.settings.includeIncoming ? v.incomingWood : 0),
       stoneTotal: v.stone + (state.settings.includeIncoming ? v.incomingStone : 0),
       ironTotal: v.iron + (state.settings.includeIncoming ? v.incomingIron : 0),
-      merchantsLeft: v.availableMerchants,
+      merchantsLeft: v.availableMerchants
     }]));
 
     state.plan.forEach(order => {
@@ -832,17 +836,12 @@
       merchantsUsed: plan.reduce((sum, row) => sum + row.merchants, 0),
       totalWood: villages.reduce((sum, v) => sum + v.wood + (state.settings.includeIncoming ? v.incomingWood : 0), 0),
       totalStone: villages.reduce((sum, v) => sum + v.stone + (state.settings.includeIncoming ? v.incomingStone : 0), 0),
-      totalIron: villages.reduce((sum, v) => sum + v.iron + (state.settings.includeIncoming ? v.incomingIron : 0), 0),
+      totalIron: villages.reduce((sum, v) => sum + v.iron + (state.settings.includeIncoming ? v.incomingIron : 0), 0)
     };
   }
 
   function parseList(value) {
-    return new Set(
-      String(value || '')
-        .split(',')
-        .map(v => v.trim())
-        .filter(Boolean)
-    );
+    return new Set(String(value || '').split(',').map(v => v.trim()).filter(Boolean));
   }
 
   function passesListFilters(village, whiteList, blackList, useWhiteListOnly) {
