@@ -856,7 +856,10 @@
     const dist = distance(x1, y1, x2, y2);
     const worldSpeed = Number(game_data?.speed || game_data?.world_speed || 1) || 1;
     const unitSpeed = Number(game_data?.unit_speed || 1) || 1;
-    return Math.ceil((dist * 10 / worldSpeed / unitSpeed) * 60) / 60;
+  
+    // Торговец: 10 минут на поле на скорости x1
+    const minutes = dist * 10 / worldSpeed / unitSpeed;
+    return Math.ceil(minutes);
   }
 
   function distance(x1, y1, x2, y2) {
